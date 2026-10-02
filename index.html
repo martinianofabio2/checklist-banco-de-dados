@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel de Formação - Banco de Dados</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            900: '#1e3a8a',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome Lucide Icons CDN -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.1);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(100,100,100,0.4);
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 min-h-screen transition-colors duration-200">
+
+    <!-- Top Navigation Bar -->
+    <header class="sticky top-0 z-50 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-700">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-3">
+                    <div class="p-2 bg-brand-600 rounded-xl text-white shadow-lg shadow-brand-500/30">
+                        <i data-lucide="graduation-cap" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <h1 class="font-bold text-lg leading-tight">Conclusão de Curso</h1>
+                        <p class="text-xs text-slate-500 dark:text-slate-400">Tecnologia em Banco de Dados</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center space-x-3">
+                    <!-- Quick Progress Badge -->
+                    <div class="hidden md:flex items-center space-x-2 bg-slate-100 dark:bg-slate-700/60 px-3 py-1.5 rounded-full text-xs font-semibold">
+                        <span class="text-slate-500 dark:text-slate-400">Geral:</span>
+                        <span id="header-total-progress-text" class="text-brand-600 dark:text-brand-400">0%</span>
+                    </div>
+
+                    <!-- Theme Toggle -->
+                    <button id="btn-theme-toggle" class="p-2 rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600 transition" title="Alternar Tema">
+                        <i data-lucide="sun" class="w-5 h-5 hidden dark:block"></i>
+                        <i data-lucide="moon" class="w-5 h-5 block dark:hidden"></i>
+                    </button>
+
+                    <!-- Reset Data Button -->
+                    <button id="btn-reset-data" class="p-2 rounded-lg bg-rose-100 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 hover:bg-rose-200 dark:hover:bg-rose-900/60 transition" title="Resetar Dados">
+                        <i data-lucide="rotate-ccw" class="w-5 h-5"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+
+        <!-- Top Stats & Countdown Banner -->
+        <section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <!-- Overall Course Completion Card -->
+            <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col justify-between">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">Progresso Geral</span>
+                        <h2 class="text-2xl font-bold mt-1" id="overview-progress-percent">0%</h2>
+                    </div>
+                    <div class="p-2.5 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-xl">
+                        <i data-lucide="pie-chart" class="w-6 h-6"></i>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <div class="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2.5 overflow-hidden">
+                        <div id="overview-progress-bar" class="bg-brand-600 h-2.5 rounded-full transition-all duration-500" style="width: 0%"></div>
+                    </div>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-2" id="overview-progress-detail">0 de 0 atividades concluídas</p>
+                </div>
+            </div>
+
+            <!-- Simulados Deadline Card -->
+            <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col justify-between">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <span class="text-xs font-semibold uppercase tracking-wider text-amber-500">Prazo Simulados</span>
+                        <h2 class="text-2xl font-bold mt-1">19/11/2026</h2>
+                    </div>
+                    <div class="p-2.5 bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400 rounded-xl">
+                        <i data-lucide="clock" class="w-6 h-6"></i>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <div class="text-xs font-medium px-2.5 py-1 rounded-md inline-block bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300" id="countdown-simulados">
+                        Calculando dias...
+                    </div>
+                </div>
+            </div>
+
+            <!-- Provas Regimentais Deadline Card -->
+            <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col justify-between">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <span class="text-xs font-semibold uppercase tracking-wider text-rose-500">Provas Regimentais</span>
+                        <h2 class="text-2xl font-bold mt-1">24/11/2026</h2>
+                    </div>
+                    <div class="p-2.5 bg-rose-50 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400 rounded-xl">
+                        <i data-lucide="calendar" class="w-6 h-6"></i>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <div class="text-xs font-medium px-2.5 py-1 rounded-md inline-block bg-rose-100 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300" id="countdown-provas">
+                        Calculando dias...
+                    </div>
+                </div>
+            </div>
+
+            <!-- Financial Pending Summary Card -->
+            <div class="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col justify-between">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <span class="text-xs font-semibold uppercase tracking-wider text-emerald-500">Financeiro</span>
+                        <h2 class="text-2xl font-bold mt-1" id="finance-status-text">0/3 Pagos</h2>
+                    </div>
+                    <div class="p-2.5 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-xl">
+                        <i data-lucide="credit-card" class="w-6 h-6"></i>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <p class="text-xs text-slate-500 dark:text-slate-400" id="finance-pending-total">Pendente: R$ 0,00</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Financial Management Checklist -->
+        <section class="bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                <div>
+                    <h3 class="text-lg font-bold flex items-center gap-2">
+                        <i data-lucide="wallet" class="w-5 h-5 text-emerald-500"></i>
+                        Checklist Financeiro de Mensalidades
+                    </h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Gerencie os pagamentos finais para garantir a colação de grau.</p>
+                </div>
+                <button id="btn-add-tuition" class="inline-flex items-center gap-1.5 text-xs font-medium bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 px-3 py-2 rounded-lg transition">
+                    <i data-lucide="plus" class="w-4 h-4"></i> Adicionar Nova Parcela
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4" id="financial-cards-container">
+                <!-- Rendered dynamically via JS -->
+            </div>
+        </section>
+
+        <!-- Academic Disciplines and Progress -->
+        <section class="space-y-4">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div>
+                    <h3 class="text-xl font-bold flex items-center gap-2">
+                        <i data-lucide="book-open" class="w-6 h-6 text-brand-500"></i>
+                        Disciplinas & Progresso Acadêmico
+                    </h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Atualize suas conquistas de Conteúdos, Exercícios e Simulados em cada disciplina.</p>
+                </div>
+            </div>
+
+            <!-- List of Disciplines -->
+            <div class="grid grid-cols-1 gap-4" id="disciplines-container">
+                <!-- Rendered dynamically via JS -->
+            </div>
+        </section>
+
+        <!-- Grade Calculator & Approval Simulator Section -->
+        <section class="bg-white dark:bg-slate-800 rounded-2xl p-6 border border-slate-200 dark:border-slate-700 shadow-sm space-y-6">
+            <div>
+                <h3 class="text-xl font-bold flex items-center gap-2">
+                    <i data-lucide="calculator" class="w-6 h-6 text-indigo-500"></i>
+                    Simulador de Notas e Aprovação
+                </h3>
+                <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                    Cálculo Oficial: <span class="font-bold text-slate-700 dark:text-slate-300">Nota Final = A + B + C + D</span> (Média Mínima para Aprovação: <span class="font-bold text-emerald-600">6,0</span>).
+                </p>
+            </div>
+
+            <!-- Information Box on Grade Formulas -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-3 bg-slate-50 dark:bg-slate-900/60 p-4 rounded-xl border border-slate-200/80 dark:border-slate-700/80 text-xs">
+                <div class="p-2">
+                    <span class="font-bold text-brand-600 dark:text-brand-400">A - Participação (Até 2,0):</span>
+                    <p class="text-slate-500 dark:text-slate-400 mt-0.5">Engajamento no AVA. *(0,0 em Sistemas Distribuidos)*</p>
+                </div>
+                <div class="p-2">
+                    <span class="font-bold text-brand-600 dark:text-brand-400">B - Exercícios (Até 2,0):</span>
+                    <p class="text-slate-500 dark:text-slate-400 mt-0.5">Média das Listas de Exercícios concluídas.</p>
+                </div>
+                <div class="p-2">
+                    <span class="font-bold text-brand-600 dark:text-brand-400">C - Simulados (Até 1,0):</span>
+                    <p class="text-slate-500 dark:text-slate-400 mt-0.5">Média dos simulados online realizados.</p>
+                </div>
+                <div class="p-2">
+                    <span class="font-bold text-brand-600 dark:text-brand-400">D - Prova (Até 5,0/10,0):</span>
+                    <p class="text-slate-500 dark:text-slate-400 mt-0.5">Considerada a **maior nota** entre Regimental e Substitutiva.</p>
+                </div>
+            </div>
+
+            <!-- Table or Interactive Cards for Entering Grades -->
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs sm:text-sm">
+                    <thead>
+                        <tr class="border-b border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 font-semibold uppercase tracking-wider">
+                            <th class="py-3 px-2">Disciplina</th>
+                            <th class="py-3 px-2 text-center w-20">Nota A</th>
+                            <th class="py-3 px-2 text-center w-20">Nota B</th>
+                            <th class="py-3 px-2 text-center w-20">Nota C</th>
+                            <th class="py-3 px-2 text-center w-24">Prova Reg. (D)</th>
+                            <th class="py-3 px-2 text-center w-24">Prova Sub. (D)</th>
+                            <th class="py-3 px-2 text-center w-24">Nota Final</th>
+                            <th class="py-3 px-2 text-center w-32">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="grades-table-body" class="divide-y divide-slate-100 dark:divide-slate-800">
+                        <!-- Dynamically Generated Grades Inputs -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Substitutive Exam Strategy Guide -->
+        <section class="bg-gradient-to-r from-slate-800 to-slate-900 text-white rounded-2xl p-6 shadow-xl border border-slate-700">
+            <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                <div class="space-y-2">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 text-xs font-semibold">
+                        <i data-lucide="alert-triangle" class="w-4 h-4"></i> Janela da Prova Substitutiva
+                    </div>
+                    <h4 class="text-lg font-bold">Quando realizar a Prova Substitutiva?</h4>
+                    <p class="text-xs text-slate-300 max-w-3xl leading-relaxed">
+                        Como o sistema considera a <strong>maior nota do Grupo D</strong>, a prova substitutiva serve para substituir a nota da Prova Regimental caso você não tenha atingido a nota mínima acumulada de <strong>6,0 pontos</strong> ou queira melhorar seu desempenho final.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Modal for adding custom financial item -->
+    <div id="modal-finance" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-700">
+            <h3 class="text-lg font-bold mb-4">Adicionar Pagamento</h3>
+            <div class="space-y-4 text-xs sm:text-sm">
+                <div>
+                    <label class="block font-medium mb-1">Data / Descrição</label>
+                    <input type="text" id="input-fin-date" placeholder="Ex: 10/12/2026" class="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-transparent">
+                </div>
+                <div>
+                    <label class="block font-medium mb-1">Valor (R$)</label>
+                    <input type="number" id="input-fin-amount" placeholder="0.00" step="0.01" class="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-transparent">
+                </div>
+                <div>
+                    <label class="block font-medium mb-1">Observações</label>
+                    <input type="text" id="input-fin-notes" placeholder="Ex: Mensalidade final" class="w-full px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-transparent">
+                </div>
+            </div>
+            <div class="flex justify-end gap-2 mt-6">
+                <button id="btn-cancel-finance" class="px-4 py-2 rounded-lg bg-slate-200 dark:bg-slate-700 text-xs font-semibold">Cancelar</button>
+                <button id="btn-save-finance" class="px-4 py-2 rounded-lg bg-brand-600 text-white text-xs font-semibold">Salvar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initial State Data Model
+        const INITIAL_STATE = {
+            financials: [
+                { id: 'f1', date: '10/10/2026', amount: 0, paid: false, notes: 'Mensalidade Outubro' },
+                { id: 'f2', date: '10/11/2026', amount: 0, paid: false, notes: 'Mensalidade Novembro' },
+                { id: 'f3', date: '10/12/2026', amount: 0, paid: false, notes: 'Mensalidade Dezembro' }
+            ],
+            disciplines: [
+                {
+                    id: 'sdcp',
+                    name: 'Sistemas Distribuidos e Computação Paralela',
+                    hasParticipation: false,
+                    conteudosTotal: 5,
+                    conteudosDone: 5,
+                    exerciciosTotal: 4,
+                    exerciciosDone: 4,
+                    simuladosTotal: 2,
+                    simuladosDone: 1,
+                    grades: { A: 0, B: 2.0, C: 0.5, D_reg: 0, D_sub: 0 }
+                },
+                {
+                    id: 'iadev',
+                    name: 'Inteligência Artificial Para Devs',
+                    hasParticipation: true,
+                    conteudosTotal: 7,
+                    conteudosDone: 3,
+                    exerciciosTotal: 7,
+                    exerciciosDone: 2,
+                    simuladosTotal: 2,
+                    simuladosDone: 0,
+                    grades: { A: 2.0, B: 0.5, C: 0, D_reg: 0, D_sub: 0 }
+                },
+                {
+                    id: 'bigdata',
+                    name: 'Tópicos de Big Data em Python',
+                    hasParticipation: true,
+                    conteudosTotal: 7,
+                    conteudosDone: 1,
+                    exerciciosTotal: 5,
+                    exerciciosDone: 0,
+                    simuladosTotal: 2,
+                    simuladosDone: 0,
+                    grades: { A: 2.0, B: 0, C: 0, D_reg: 0, D_sub: 0 }
+                },
+                {
+                    id: 'govdados',
+                    name: 'Governança de Dados',
+                    hasParticipation: true,
+                    conteudosTotal: 5,
+                    conteudosDone: 2,
+                    exerciciosTotal: 4,
+                    exerciciosDone: 0,
+                    simuladosTotal: 2,
+                    simuladosDone: 0,
+                    grades: { A: 2.0, B: 0, C: 0, D_reg: 0, D_sub: 0 }
+                },
+                {
+                    id: 'scrum',
+                    name: 'Métodos Ágeis Com Scrum',
+                    hasParticipation: true,
+                    conteudosTotal: 5,
+                    conteudosDone: 5,
+                    exerciciosTotal: 4,
+                    exerciciosDone: 4,
+                    simuladosTotal: 2,
+                    simuladosDone: 1,
+                    grades: { A: 2.0, B: 2.0, C: 0.5, D_reg: 0, D_sub: 0 }
+                }
+            ]
+        };
+
+        // App State Manager
+        let appState = JSON.parse(localStorage.getItem('db_course_tracker')) || INITIAL_STATE;
+
+        // Save State helper
+        function saveState() {
+            localStorage.setItem('db_course_tracker', JSON.stringify(appState));
+            renderAll();
+        }
+
+        // Dark/Light Theme Handler
+        const themeBtn = document.getElementById('btn-theme-toggle');
+        themeBtn.addEventListener('click', () => {
+            document.documentElement.classList.toggle('dark');
+        });
+
+        // Reset Data Listener
+        document.getElementById('btn-reset-data').addEventListener('click', () => {
+            if (confirm('Deseja realmente restaurar os dados iniciais do curso?')) {
+                appState = JSON.parse(JSON.stringify(INITIAL_STATE));
+                saveState();
+            }
+        });
+
+        // Countdowns
+        function updateCountdowns() {
+            const now = new Date();
+            
+            // Dates for 2026
+            const deadlineSimulados = new Date('2026-11-19T23:59:59');
+            const deadlineProvas = new Date('2026-11-24T23:59:59');
+
+            function getDiffText(targetDate) {
+                const diffTime = targetDate - now;
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                if (diffDays < 0) return 'Prazo encerrado';
+                if (diffDays === 0) return 'Hoje é o último dia!';
+                return `Restam ${diffDays} dias`;
+            }
+
+            document.getElementById('countdown-simulados').textContent = getDiffText(deadlineSimulados);
+            document.getElementById('countdown-provas').textContent = getDiffText(deadlineProvas);
+        }
+
+        // Render Financial Section
+        function renderFinancials() {
+            const container = document.getElementById('financial-cards-container');
+            container.innerHTML = '';
+
+            let paidCount = 0;
+            let pendingTotal = 0;
+
+            appState.financials.forEach((item) => {
+                if (item.paid) paidCount++;
+                else pendingTotal += parseFloat(item.amount || 0);
+
+                const card = document.createElement('div');
+                card.className = `p-4 rounded-xl border transition ${
+                    item.paid 
+                    ? 'bg-emerald-50/50 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-800' 
+                    : 'bg-slate-50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-700'
+                }`;
+
+                card.innerHTML = `
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-xs font-bold px-2 py-0.5 rounded ${
+                            item.paid 
+                            ? 'bg-emerald-100 dark:bg-emerald-900 text-emerald-700 dark:text-emerald-300' 
+                            : 'bg-amber-100 dark:bg-amber-900 text-amber-700 dark:text-amber-300'
+                        }">
+                            Vencimento: ${item.date}
+                        </span>
+                        <input type="checkbox" ${item.paid ? 'checked' : ''} class="w-5 h-5 rounded text-emerald-600 focus:ring-emerald-500 cursor-pointer" onchange="toggleFinancePaid('${item.id}')">
+                    </div>
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-center text-xs">
+                            <span class="text-slate-500">Valor (R$):</span>
+                            <input type="number" step="0.01" value="${item.amount || ''}" placeholder="0,00" class="w-24 text-right px-2 py-1 rounded border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-xs font-semibold" onchange="updateFinanceAmount('${item.id}', this.value)">
+                        </div>
+                        <input type="text" value="${item.notes || ''}" placeholder="Anotações..." class="w-full px-2 py-1 rounded border border-slate-200 dark:border-slate-700 bg-transparent text-xs text-slate-500" onchange="updateFinanceNotes('${item.id}', this.value)">
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+
+            document.getElementById('finance-status-text').textContent = `${paidCount}/${appState.financials.length} Pagos`;
+            document.getElementById('finance-pending-total').textContent = `Pendente: R$ ${pendingTotal.toFixed(2)}`;
+        }
+
+        window.toggleFinancePaid = function(id) {
+            const item = appState.financials.find(f => f.id === id);
+            if (item) {
+                item.paid = !item.paid;
+                saveState();
+            }
+        };
+
+        window.updateFinanceAmount = function(id, val) {
+            const item = appState.financials.find(f => f.id === id);
+            if (item) {
+                item.amount = parseFloat(val) || 0;
+                saveState();
+            }
+        };
+
+        window.updateFinanceNotes = function(id, val) {
+            const item = appState.financials.find(f => f.id === id);
+            if (item) {
+                item.notes = val;
+                saveState();
+            }
+        };
+
+        // Modal Finance Actions
+        const modalFin = document.getElementById('modal-finance');
+        document.getElementById('btn-add-tuition').addEventListener('click', () => modalFin.classList.remove('hidden'));
+        document.getElementById('btn-cancel-finance').addEventListener('click', () => modalFin.classList.add('hidden'));
+        document.getElementById('btn-save-finance').addEventListener('click', () => {
+            const date = document.getElementById('input-fin-date').value || 'Nova Data';
+            const amount = parseFloat(document.getElementById('input-fin-amount').value) || 0;
+            const notes = document.getElementById('input-fin-notes').value || '';
+
+            appState.financials.push({
+                id: 'f_' + Date.now(),
+                date,
+                amount,
+                paid: false,
+                notes
+            });
+
+            document.getElementById('input-fin-date').value = '';
+            document.getElementById('input-fin-amount').value = '';
+            document.getElementById('input-fin-notes').value = '';
+            modalFin.classList.add('hidden');
+            saveState();
+        });
+
+        // Render Disciplines Section
+        function renderDisciplines() {
+            const container = document.getElementById('disciplines-container');
+            container.innerHTML = '';
+
+            appState.disciplines.forEach((disc) => {
+                // Calculate progress %
+                const totalItems = disc.conteudosTotal + disc.exerciciosTotal + disc.simuladosTotal;
+                const doneItems = disc.conteudosDone + disc.exerciciosDone + disc.simuladosDone;
+                const percent = Math.round((doneItems / totalItems) * 100) || 0;
+
+                const discCard = document.createElement('div');
+                discCard.className = 'bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700 shadow-sm space-y-4';
+
+                discCard.innerHTML = `
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 dark:border-slate-700/60 pb-3">
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <h4 class="font-bold text-base sm:text-lg">${disc.name}</h4>
+                                ${!disc.hasParticipation ? '<span class="text-[10px] uppercase font-bold bg-amber-100 text-amber-700 dark:bg-amber-950/80 dark:text-amber-300 px-2 py-0.5 rounded-full">Sem Nota A (Participação)</span>' : ''}
+                            </div>
+                            <p class="text-xs text-slate-400">ID: ${disc.id.toUpperCase()}</p>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span class="text-sm font-bold text-brand-600 dark:text-brand-400">${percent}% concluído</span>
+                        </div>
+                    </div>
+
+                    <!-- Progress Bar -->
+                    <div class="w-full bg-slate-100 dark:bg-slate-700/60 rounded-full h-2 overflow-hidden">
+                        <div class="bg-brand-600 h-2 rounded-full transition-all duration-300" style="width: ${percent}%"></div>
+                    </div>
+
+                    <!-- Interactive Trackers -->
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
+                        <!-- Conteudos -->
+                        <div class="bg-slate-50 dark:bg-slate-900/40 p-3 rounded-xl border border-slate-200/60 dark:border-slate-700/60 flex justify-between items-center">
+                            <div>
+                                <span class="font-semibold block text-slate-700 dark:text-slate-300">Conteúdos</span>
+                                <span class="text-slate-400 text-[11px]">${disc.conteudosDone} de ${disc.conteudosTotal} lidos</span>
+                            </div>
+                            <div class="flex items-center gap-1">
+                                <button onclick="adjustCounter('${disc.id}', 'conteudosDone', -1)" class="w-7 h-7 rounded-lg bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 font-bold hover:bg-slate-100 dark:hover:bg-slate-700">-</button>
+                                <button onclick="adjustCounter('${disc.id}', 'conteudosDone', 1)" class="w-7 h-7 rounded-lg bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 font-bold hover:bg-slate-100 dark:hover:bg-slate-700">+</button>
+                            </div>
+                        </div>
+
+                        <!-- Exercícios -->
+                        <div class="bg-slate-50 dark:bg-slate-900/40 p-3 rounded-xl border border-slate-200/60 dark:border-slate-700/60 flex justify-between items-center">
+                            <div>
+                                <span class="font-semibold block text-slate-700 dark:text-slate-300">Exercícios</span>
+                                <span class="text-slate-400 text-[11px]">${disc.exerciciosDone} de ${disc.exerciciosTotal} feitos</span>
+                            </div>
+                            <div class="flex items-center gap-1">
+                                <button onclick="adjustCounter('${disc.id}', 'exerciciosDone', -1)" class="w-7 h-7 rounded-lg bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 font-bold hover:bg-slate-100 dark:hover:bg-slate-700">-</button>
+                                <button onclick="adjustCounter('${disc.id}', 'exerciciosDone', 1)" class="w-7 h-7 rounded-lg bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 font-bold hover:bg-slate-100 dark:hover:bg-slate-700">+</button>
+                            </div>
+                        </div>
+
+                        <!-- Simulados -->
+                        <div class="bg-slate-50 dark:bg-slate-900/40 p-3 rounded-xl border border-slate-200/60 dark:border-slate-700/60 flex justify-between items-center">
+                            <div>
+                                <span class="font-semibold block text-slate-700 dark:text-slate-300">Simulados</span>
+                                <span class="text-slate-400 text-[11px]">${disc.simuladosDone} de ${disc.simuladosTotal} feitos</span>
+                            </div>
+                            <div class="flex items-center gap-1">
+                                <button onclick="adjustCounter('${disc.id}', 'simuladosDone', -1)" class="w-7 h-7 rounded-lg bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 font-bold hover:bg-slate-100 dark:hover:bg-slate-700">-</button>
+                                <button onclick="adjustCounter('${disc.id}', 'simuladosDone', 1)" class="w-7 h-7 rounded-lg bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 font-bold hover:bg-slate-100 dark:hover:bg-slate-700">+</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                container.appendChild(discCard);
+            });
+        }
+
+        window.adjustCounter = function(discId, field, delta) {
+            const disc = appState.disciplines.find(d => d.id === discId);
+            if (disc) {
+                const maxField = field.replace('Done', 'Total');
+                const max = disc[maxField];
+                const newVal = disc[field] + delta;
+                if (newVal >= 0 && newVal <= max) {
+                    disc[field] = newVal;
+                    saveState();
+                }
+            }
+        };
+
+        // Render Grades and Simulator Table
+        function renderGradesTable() {
+            const tbody = document.getElementById('grades-table-body');
+            tbody.innerHTML = '';
+
+            appState.disciplines.forEach((disc) => {
+                const g = disc.grades;
+
+                // Max grade D is max between Regimental and Substitutive
+                const bestD = Math.max(parseFloat(g.D_reg || 0), parseFloat(g.D_sub || 0));
+                
+                // Final Grade calculation
+                const noteA = disc.hasParticipation ? parseFloat(g.A || 0) : 0;
+                const noteB = parseFloat(g.B || 0);
+                const noteC = parseFloat(g.C || 0);
+                const finalGrade = (noteA + noteB + noteC + bestD).toFixed(1);
+
+                const isApproved = parseFloat(finalGrade) >= 6.0;
+
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-50/50 dark:hover:bg-slate-700/30 transition';
+
+                tr.innerHTML = `
+                    <td class="py-3 px-2 font-medium">
+                        ${disc.name}
+                        ${!disc.hasParticipation ? '<div class="text-[10px] text-amber-500">Sem nota de participação</div>' : ''}
+                    </td>
+                    <td class="py-3 px-2 text-center">
+                        ${disc.hasParticipation 
+                            ? `<input type="number" step="0.1" min="0" max="2" value="${g.A}" onchange="updateGrade('${disc.id}', 'A', this.value)" class="w-14 text-center p-1 rounded border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800">`
+                            : '<span class="text-slate-400 font-mono">0.0</span>'
+                        }
+                    </td>
+                    <td class="py-3 px-2 text-center">
+                        <input type="number" step="0.1" min="0" max="2" value="${g.B}" onchange="updateGrade('${disc.id}', 'B', this.value)" class="w-14 text-center p-1 rounded border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800">
+                    </td>
+                    <td class="py-3 px-2 text-center">
+                        <input type="number" step="0.1" min="0" max="1" value="${g.C}" onchange="updateGrade('${disc.id}', 'C', this.value)" class="w-14 text-center p-1 rounded border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800">
+                    </td>
+                    <td class="py-3 px-2 text-center">
+                        <input type="number" step="0.1" min="0" max="5" value="${g.D_reg}" onchange="updateGrade('${disc.id}', 'D_reg', this.value)" class="w-16 text-center p-1 rounded border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800">
+                    </td>
+                    <td class="py-3 px-2 text-center">
+                        <input type="number" step="0.1" min="0" max="5" value="${g.D_sub}" onchange="updateGrade('${disc.id}', 'D_sub', this.value)" class="w-16 text-center p-1 rounded border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800">
+                    </td>
+                    <td class="py-3 px-2 text-center font-bold text-base ${isApproved ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400'}">
+                        ${finalGrade} / 10.0
+                    </td>
+                    <td class="py-3 px-2 text-center">
+                        ${isApproved 
+                            ? '<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"><i data-lucide="check-circle" class="w-3.5 h-3.5"></i> Aprovado</span>' 
+                            : '<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300"><i data-lucide="alert-circle" class="w-3.5 h-3.5"></i> Precisa Prova Sub</span>'
+                        }
+                    </td>
+                `;
+
+                tbody.appendChild(tr);
+            });
+        }
+
+        window.updateGrade = function(discId, field, val) {
+            const disc = appState.disciplines.find(d => d.id === discId);
+            if (disc) {
+                disc.grades[field] = parseFloat(val) || 0;
+                saveState();
+            }
+        };
+
+        // Update Global Overview Progress
+        function updateGlobalOverview() {
+            let totalTasks = 0;
+            let completedTasks = 0;
+
+            appState.disciplines.forEach(d => {
+                totalTasks += d.conteudosTotal + d.exerciciosTotal + d.simuladosTotal;
+                completedTasks += d.conteudosDone + d.exerciciosDone + d.simuladosDone;
+            });
+
+            const overallPercent = Math.round((completedTasks / totalTasks) * 100) || 0;
+
+            document.getElementById('overview-progress-percent').textContent = `${overallPercent}%`;
+            document.getElementById('header-total-progress-text').textContent = `${overallPercent}%`;
+            document.getElementById('overview-progress-bar').style.width = `${overallPercent}%`;
+            document.getElementById('overview-progress-detail').textContent = `${completedTasks} de ${totalTasks} atividades concluídas`;
+        }
+
+        // Global Render Trigger
+        function renderAll() {
+            updateCountdowns();
+            renderFinancials();
+            renderDisciplines();
+            renderGradesTable();
+            updateGlobalOverview();
+            // Re-initialize lucide icons for newly created DOM nodes
+            lucide.createIcons();
+        }
+
+        // Initialize application on load
+        window.onload = function() {
+            renderAll();
+        };
+    </script>
+</body>
+</html>
